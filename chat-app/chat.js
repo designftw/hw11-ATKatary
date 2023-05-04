@@ -179,6 +179,8 @@ const app = {
     privateMessage(actor) {
       this.recipient = actor;
       this.privateMessaging = true;
+      document.body.getElementById("private").classList.add("appear")
+      setTimeout(() => document.getElementById("private").classList.remove("appear"), 1000)
     },
 
     async requestUsername() {
@@ -325,7 +327,8 @@ const Like = {
   },
 
   methods: {
-    sendLike() {
+    sendLike(event) {
+      event.target.classList.add("spin");
       const myLikes = this.likesRaw.filter(
         like => (like.type === "Like") && (like.object === this.messageid) && (like.actor === this.$gf.me)
       )
@@ -338,10 +341,13 @@ const Like = {
       }
 
       // Send!
+      setTimeout(() =>event.target.classList.remove("spin"), 1000)
       this.$gf.post(like)
     },
 
-    unlike() {
+    unlike(event) {
+      event.target.classList.add("spin-2");
+      setTimeout(() => event.target.classList.remove("spin"), 1000)
       const myLikes = this.likesRaw.filter(
         like => (like.type === "Like") && (like.object === this.messageid) && (like.actor === this.$gf.me)
       )

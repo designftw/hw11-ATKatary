@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="app" class="flex column">
+    <div id="app" class="flex column appear">
       <div style="padding: 10px;">
         <button @click="$gf.toggleLogIn">
           {{ $gf.me? 'Log Out' : 'Log In' }}
@@ -37,7 +37,7 @@
         <div id="channels" class="flex column align-center" style="width: 100%;">
           <div style="margin-bottom: 20px;" v-if="!privateMessaging">
             <h2 style="text-align: center;">Channel</h2>
-            <input id="channel" v-model="channel" style="font-size: 20px; text-align: center;"/>
+            <div class="typewriter"><input id="channel" v-model="channel" style="font-size: 20px; text-align: center;"/></div>
           </div>
           <div v-else>
             <name :actor="recipient"></name>
@@ -67,7 +67,7 @@
             <div 
               v-for="message of messages"
               style="margin-left: 20px; width: max-content; max-width: 55%; overflow-wrap: break-word; margin-bottom: 0;"
-              :class="`flex column ${(message.actor !== $gf.me)? 'align-self-start' : 'align-self-end'}`"
+              :class="`flex column ${(message.actor !== $gf.me)? 'align-self-start' : 'align-self-end'} bounceIn`"
             >
               <div v-if="message.attachment">
                 <img :src="downloadedImages[message.attachment.magnet]" style="height: 200px;"/>
@@ -107,7 +107,9 @@
                       <p 
                         class="text" 
                         v-if="editID !== message.id"
-                        :style="`background-color: ${(message.actor !== $gf.me)? '#c4c4c4' : '#50eeff'}; ${(message.actor !== $gf.me)? '' : 'margin-left: 5px'}`">
+                        :style="`background-color: ${(message.actor !== $gf.me)? '#c4c4c4' : '#50eeff'}; ${(message.actor !== $gf.me)? '' : 'margin-left: 5px'}`"
+                        :class="`${(message.actor !== $gf.me)? 'color-change' : ''}`"
+                      >
                         {{message.content}}
                       </p>
                     </div>
@@ -188,7 +190,7 @@
         src="./like.png" 
         style="width: 50px; margin: 10px;" 
         class="pointer img-btn" 
-        @click="sendLike"
+        @click="sendLike($event)"
         v-if="actor !== $gf.me"
       />
       {{ likes.length }}
@@ -196,7 +198,7 @@
         src="./like.png" 
         style="width: 50px; margin: 10px; rotate: 180deg;" 
         class="pointer img-btn"
-        @click="unlike"
+        @click="unlike($event)"
         v-if="actor !== $gf.me"
       />
     </template>

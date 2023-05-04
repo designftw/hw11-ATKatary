@@ -40,3 +40,80 @@ body, button, span, input {
 .img-btn:active {
   opacity: 60%;
 }
+
+.spin {
+  animation: spin 1s linear;
+}
+.spin-2 {
+  animation: spin 1s linear;
+}
+
+.appear {
+  animation: fadeInAnimation 5s forwards;
+}
+
+@keyframes spin {
+  from {
+      transform:rotate(0deg);
+  }
+  to {
+      transform:rotate(360deg);
+  }
+}
+
+@keyframes fadeInAnimation {
+  0% {
+      opacity: 0;
+  }
+  100% {
+      opacity: 1;
+   }
+}
+
+.color-change:hover {
+  animation: example 1s forwards;
+}
+@keyframes example {
+  from {background-color: #c4c4c4;}
+  to {background-color: #50eeff;}
+}
+
+.typewriter input {
+  overflow: hidden; 
+  border-right: .15em solid orange; 
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: .15em; 
+  animation: 
+    typing 3.5s steps(40, end),
+    blink-caret .75s step-end forwards;
+}
+
+/* The typing effect */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: orange; }
+}
+
+.bounceIn {
+  animation: bounceIn 3s forwards;
+}
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
