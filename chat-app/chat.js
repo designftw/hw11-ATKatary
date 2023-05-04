@@ -495,18 +495,17 @@ const Profile = {
     return $gf.useObjects([actor])
   },
 
-  async created() {
-    this.resolver = new Resolver(this.$gf)
-    // console.log(`${this.$gf.me} => ${this.username}`)
-  },
+  // async created() {
+  //   this.resolver = new Resolver(this.$gf)
+  //   // console.log(`${this.$gf.me} => ${this.username}`)
+  // },
 
   watch: {
-    async actor() {
-      console.log(this.actor)
-      this.username = await this.resolver.actorToUsername(this.actor);
-      this.url = await this.$gf.media.fetch(this.profile.icon.magnet[0]);
-      this.pic = this.url;
-    },
+    async profile(profile) {
+      this.resolver = new Resolver(this.$gf)
+      this.url = await this.$gf.media.fetch(profile.icon.magnet[0]);
+      this.pic = URL.createObjectURL(this.url);
+    }
   },
 
   computed: {
@@ -520,9 +519,9 @@ const Profile = {
           // Is the value of that property 'Profile'?
           m.type=='Profile' &&
           // Does the message have a name property?
-          m.name &&
+          m.icon &&
           // Is that property a string?
-          typeof m.name=='string')
+          typeof m.icon=='object')
         // Choose the most recent one or null if none exists
         .reduce((prev, curr)=> !prev || curr.published > prev.published? curr : prev, null)
         // console.log(profile);
@@ -532,7 +531,6 @@ const Profile = {
 
   data() {
     return {
-      actor: undefined,
       editing: false,
       pic: undefined,
       username: "",
