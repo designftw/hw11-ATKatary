@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+}
+
+body, button, span, input {
+  font-family: 'Indie Flower';
+  font-size: 18px;
+}
+
+.user {
+  background-color: #FDF3BD;
+}
+#channel {
+  width: 150px;
+  height: 30px;
+}
+#app {}
+  
+.left-bar {}
+
+.right-bar {}
+
+.text {
+  overflow-wrap: anywhere;
+  padding: 5px;
+  /* color: #fff; */
+}
+
+.flex {display: flex;}
+.align-end {align-content: flex-end;}
+.align-self-end {align-self: flex-end;}
+.align-self-start {align-self: flex-start;}
+.pointer:hover {cursor: pointer;}
+.column {flex-direction: column;}
+.align-center {align-items: center;}
+.align-self-center {align-self: center;}
+.justify-end {justify-content: flex-end;}
+.justify-center {justify-content: center;}
+.justify-between {justify-content: space-between;}
+.img-btn:active {
+  opacity: 60%;
+}

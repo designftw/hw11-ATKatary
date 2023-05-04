@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="module" src="./chat.js"></script>
+  <link rel="stylesheet" href="./chat.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="flex column">
+      <div style="padding: 10px;">
+        <button @click="$gf.toggleLogIn">
+          {{ $gf.me? 'Log Out' : 'Log In' }}
+        </button>
+      </div>
+      
+      <div v-if="$gf.me" class="flex column align-center" style="width: 100%;">
+        <div class="flex column align-self-start" style="margin: 10px;">
+          <profile :actor="$gf.me" :editable="true"></profile>
+          <name :actor="$gf.me" :editable="true" style="margin: 5px;"></name>
+          <form @submit.prevent="requestUsername" style="margin: 5px;">
+            <label>Username </label>
+            <input v-model="username" :value="username"/>
+            <input type="submit" value="Request"/>
+          </form>
+        </div>
+
+        <div id="dm" class="flex" style="width: 100%;" v-if="privateMessaging">
+          <div>
+            <div v-for="user of users">
+              <name :actor="user" />
+            </div>
+          </div>
+          <div></div>
+        </div>
+        <div id="channels" class="flex column align-center" style="width: 100%;">
+          <div style="margin-bottom: 20px;" v-if="!privateMessaging">
+            <h2 style="text-align: center;">Channel</h2>
+            <input id="channel" v-model="channel" style="font-size: 20px; text-align: center;"/>
+          </div>
+          <div v-else>
+            <name :actor="recipient"></name>
+            <button @click="backToChannel">Back to Channel</button>
+          </div>
+          <div 
+            class="flex column justify-end align-center"
+            :style="`width: 90%;`"
+          >
+            <span id="attach" class="align-self-start align-center" style="display: none; margin-left: 10px;" id="attatchement">
+              <p id="attachName" style="margin-right: 10px;"></p>
+              <img id="removeAttach" src="./x.png" style="width: 10px;" class="pointer" @click="onImageRemove"/>
+            </span>
+            <form @submit.prevent="sendMessage" class="flex align-center" style="width: 100%;">
+              <input type="hidden" v-model="recipient"/>
+              <input id="img" type="file" accept="image/*" style="display: none;" @change="onImageAttachment"/>
+              <img id="imgPng" src="./image-png.png" style="width: 50px; margin: 10px;" class="pointer img-btn" @click="uploadImg"/>
+              
+              <input 
+                v-model="messageText" 
+                id="messagetext"
+                placeholder="Type a message..." 
+                style="width: calc(100% - 94.26px - 40px); height: 20px; padding: 10px;"
+              />
+              <input type="submit" value="Send" style="height: 30px; margin: 10px;"/>
+            </form>
+            <div 
+              v-for="message of messages"
+              style="margin-left: 20px; width: max-content; max-width: 55%; overflow-wrap: break-word; margin-bottom: 0;"
+              :class="`flex column ${(message.actor !== $gf.me)? 'align-self-start' : 'align-self-end'}`"
+            >
+              <div v-if="message.attachment">
+                <img :src="downloadedImages[message.attachment.magnet]" style="height: 200px;"/>
+              </div>
+              <p 
+                id="message.id"
+                style="width: max-content;"
+                :class="`flex column ${(message.actor !== $gf.me)? 'align-self-start' : 'align-self-end'}`"
+              >
+                <div class="flex align-center" :style="`${(message.actor !== $gf.me)? '' : 'flex-direction: row-reverse'}; flex-wrap: wrap`">
+                  <profile :actor="message.actor"></profile>
+                  <img 
+                    v-if="message.actor === $gf.me" 
+                    id="removeAttach" 
+                    src="./x.png" 
+                    style="width: 10px;" 
+                    class="pointer" 
+                    @click="removeMessage(message)"
+                  />
+                  <img 
+                    src="./edit.png" 
+                    v-if="message.actor === $gf.me" 
+                    style="width: 30px; margin: 10px;" 
+                    class="pointer img-btn" 
+                    @click="startEditMessage(message)"
+                  />
+                  <div class="flex column" style="max-width: 50%;">
+                    <p v-if="message.inReplyTo">Replying to</p>
+                    <p 
+                      v-if="message.inReplyTo"
+                      style="background-color: #c4c4c4; opacity: 60%; padding: 5px;"
+                    >
+                      {{message.inReplyTo}}
+                    </p>
+                    <div class="flex align-center" style="width: 100%; justify-content: flex-end;">
+                      <like :messageid="message.id" :actor="message.actor" v-if="message.actor === $gf.me"></like>
+                      <p 
+                        class="text" 
+                        v-if="editID !== message.id"
+                        :style="`background-color: ${(message.actor !== $gf.me)? '#c4c4c4' : '#50eeff'}; ${(message.actor !== $gf.me)? '' : 'margin-left: 5px'}`">
+                        {{message.content}}
+                      </p>
+                    </div>
+                  </div>
+                  <form 
+                    v-if="editID === message.id" 
+                    @submit.prevent="saveEditMessage(message)"
+                    class="flex align-center"
+                    :style="`${(message.actor !== $gf.me)? '' : 'margin-left: 5px'} width: 80vw;`"
+                  >
+                    <input v-model="editText" style="width: 60vw;" :style="`${(message.actor !== $gf.me)? '' : 'margin-left: 5px'}`">
+                    <input type="submit" value="Save"/>
+                  </form>
+                  <like :messageid="message.id" :actor="message.actor" v-if="message.actor !== $gf.me"></like>
+                  <img 
+                    src="./chat.png" 
+                    class="pointer img-btn" 
+                    style="width: 50px;" 
+                    @click="privateMessage(message.actor)"
+                    v-if="message.actor !== $gf.me"
+                  />
+                  <reply 
+                    :messageid="message.id" 
+                    :replyText="message.content" 
+                    v-if="message.actor !== $gf.me"
+                  ></reply>
+                </div>
+                
+                <name :actor="message.actor" :style="`margin: 5px; ${(message.actor !== $gf.me)? '' : 'align-self: flex-end'}`"></name>
+                <read :messageid="message.id" :actor="message.actor" v-if="message.actor === $gf.me" style="align-self: flex-end;"></read>
+              </p>
+            </div>
+            <button @click="loadMore">Load More</button>
+          </div>
+        </div>
+      </div>
+      <input v-model="usernameStatus" id="notification" readonly style="display:none; position: fixed; top: 0; right: 0"/>
+    </div>
+
+    <template id="read">
+      <div class="flex">
+        <p v-for="message of read">
+          <name :actor="message.actor"></name>
+        </p>
+      </div>
+    </template>
+
+    <template id="reply" class="flex column">
+      <form @submit.prevent="sendReply" class="flex align-center" style="width: 100%;" v-if="replying">
+        <input 
+          v-model="messageText" 
+          id="messagetext"
+          placeholder="Type a message..." 
+          style="width: calc(100% - 94.26px - 40px); height: 20px; padding: 10px;"
+        />
+        <input type="submit" value="Send" style="height: 30px; margin: 10px;"/>
+      </form>
+      <button v-else @click="startReply">Reply</button>
+    </template>
+
+    <template id="name">
+      <span v-if="!editing">
+        {{ profile? profile.name : 'Anonymous' }} - {{username}}
+        
+        <button v-if="editable" @click="editName">
+          Edit Name
+        </button>
+      </span>
+  
+      <form v-else @submit.prevent="saveName">
+        <input v-model="editText"/>
+        <input type="submit" value="Save Name"/>
+      </form>
+    </template>
+
+    <template id="like">
+      <img 
+        src="./like.png" 
+        style="width: 50px; margin: 10px;" 
+        class="pointer img-btn" 
+        @click="sendLike"
+        v-if="actor !== $gf.me"
+      />
+      {{ likes.length }}
+      <img 
+        src="./like.png" 
+        style="width: 50px; margin: 10px; rotate: 180deg;" 
+        class="pointer img-btn"
+        @click="unlike"
+        v-if="actor !== $gf.me"
+      />
+    </template>
+
+    <template id="profile">
+      <div class="flex align-center">
+        <!-- {{profile}} -->
+        <input id="profileImg" type="file" accept="image/*" style="display: none;" @change="onProfileUpload" v-if="editable"/>
+        <img id="profilePic" :src="pic" style="width:50px; height: 50px; border-radius: 50%; margin: 10px;"/>
+        <button id="uploadProfileBtn" class="pointer" @click="editPic" v-if="editable">Upload</button>
+        <button id="saveProfileBtn" style="display: none;" class="pointer" @click="savePic" v-if="editable">Save</button>
+      </div>
+    </template>
+</body>
+</html>
