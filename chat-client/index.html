@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="./project.css"/>
+        <script type="module" src="./project.js"></script>
+    </head>
+    <body>
+        <div id="app" v-if="$gf.me" class="flex column">
+            <nav style="padding: 30px; padding-bottom: 0;">
+                <actor 
+                    :actor="$gf.me" 
+                    style="width: max-content"
+                    classes="flex align-center column"
+                ></actor>
+            </nav>
+
+            <div class="flex align-center justify-between">
+                <ul style="width: 270px; border-right: 1px solid #000; max-height: 70vh; overflow: scroll; padding-left: 25px;">
+                    <li 
+                        :id="actor"
+                        class="pointer btn"
+                        v-for="actor of actors" 
+                        @click="chat(actor)"
+                        style="list-style-type: none; margin-bottom: 20px; padding: 10px;"
+                    >
+                        <actor :actor="actor" classes="flex align-center"></actor>
+                    </li>
+                </ul>
+
+                <div 
+                    :id="`${actor}Chat`"
+                    v-for="actor of actors"
+                    style="width: calc(100% - 400px); padding-left: 30px; padding-right: 30px; height: 70vh;"
+                    class="hidden align-self-end column"
+                >
+                    <div 
+                        class="flex row-reverse align-center"
+                        style="height: 7%; border-bottom: 0.5px solid #000; margin-bottom: 5px; padding-bottom: 2px;" 
+                    >
+                        <img
+                            @click="settings(actor)"
+                            :id="`${actor}SettingsBtn`"
+                            src="./images/icon-gear.png"
+                            class="pointer upload-icon" 
+                            style="margin: 5px; height: 30px;" 
+                        />
+                        <img
+                            @click="messages(actor)"
+                            :id="`${actor}MessagesBtn`"
+                            src="./images/icon-chat.png"
+                            class="pointer upload-icon hidden" 
+                            style="margin: 5px; height: 22px;" 
+                        />
+                    </div>
+                    <div style="height: 90%;" :id="`${actor}Messages`">
+                        <chat :context="actor"></chat>
+                        <message :actor="actor"></message>
+                    </div>
+                    <div :id="`${actor}Settings`" class="hidden" style="height: 90%;">
+                        <schedule :actor="actor"></schedule>
+                    </div>
+                </div>
+            </div>
+            <notification id="notification" :timeout="3"></notification>
+        </div>
+
+        <!-- Templates -->
+        <template id="message">
+            <div class="flex align-center">
+                <img 
+                    src="./images/icon-img.png"
+                    class="circle-30px pointer upload-icon" 
+                    style="border: 0.5px solid #000;" 
+                />
+                <input 
+                    v-model="content" 
+                    class="message-input" 
+                    v-on:keyup.enter="send"
+                    style="width: calc(100% - 110px);" 
+                />
+                <button style="width: 60px;" @click="send">Send</button>
+            </div>
+        </template>
+
+        <template id="actor">
+            <div :class="classes" :style="style">
+                <div class="flex column align-center">      
+                    <img :src="url" class="circle-50px fit-cover"/>
+                    <input 
+                        type="file" 
+                        class="hidden"
+                        accept="image/*" 
+                        id="actorImgUpload" 
+                        v-if="actor === $gf.me" 
+                        @change="uploadActorImg"
+                    />
+                    <p 
+                        @click="upload"
+                        v-if="actor === $gf.me" 
+                        style="position: absolute; background-color: #c4c4c4; margin: 0;"
+                        class="edit-icon circle-50px pointer flex align-end justify-center" 
+                    >
+                        Edit
+                    </p>
+                    <div>
+                        <button 
+                            id="actorImgSave" 
+                            @click="actorImg(true)"
+                            class="hidden pointer"
+                            v-if="actor === $gf.me" 
+                            style="margin-top: 10px; margin-right: 5px;"
+                        >
+                            Save
+                        </button>
+                        <button 
+                            id="actorImgCancel" 
+                            class="hidden pointer"
+                            @click="actorImg(false)"
+                            v-if="actor === $gf.me" 
+                            style="margin-top: 10px; margin-left: 5px;"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                <!-- <p>Username: {{username}}</p> -->
+                <div class="flex align-center justify-between" :style="`${actor !== $gf.me ? 'width: calc(100% - 50px);' : ''}`">
+                    <p :style="`${(actor === $gf.me)? '' : 'margin-left: 20px;'}`">{{name}}</p>
+                    <p 
+                        :id="`${actor}Unreads`"
+                        v-if="actor !== $gf.me" 
+                        class="circle-30px flex align-center justify-center"
+                        style="margin: 0; color: #fff;"  
+                    ></p>
+                    <!-- add name editing -->
+                </div>
+            </div>
+        </template>
+
+        <template id="chat">
+            <div class="flex column justify-between" style="height: calc(100% - 31px); overflow: scroll;">
+                <button class="hidden" @click="opened" :id="`${context}Open`"></button>
+                <button 
+                    @click="load"
+                    class="pointer"
+                >
+                    Load more
+                </button>
+                <div class="flex column">
+                    <div 
+                        v-for="message of messages"
+                        style="margin-top: 20px; margin-bottom: 20px;"
+                        :class="`${(message.actor === $gf.me)? 'align-self-end' : ''} flex align-center`"
+                    >
+                        <span class="flex column align-end">
+                            <p style="margin: 0;">{{message.content}}</p>
+                            <read :messageid="message.id" :context="context" :actor="message.actor"></read>
+                        </span>
+                        <img 
+                            @click="remove(message)"
+                            src="./images/icon-bin.png"
+                            class="pointer upload-icon" 
+                            v-if="message.actor === $gf.me"
+                            style="margin-left: 10px; width: 13px; height: 13px;" 
+                        />
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="read">
+            <p style="margin: 0; font-size: x-small;"><i>{{read}}</i></p>
+        </template>
+
+        <template id="schedule">
+            <div class="flex align-center justify-between">
+                <h3>Notification Schedule</h3>
+                <div>
+                    <button class="pointer" @click="selectAll" style="margin-right: 5px;">Select All</button>
+                    <button class="pointer" @click="clearAll" style="margin-right: 5px;">Clear All</button>
+                    <button class="pointer" @click="reset" style="margin-right: 5px;">Reset</button>
+                    <button class="pointer" @click="save">Save</button>
+                </div>
+            </div>
+            <table>
+                <tr>
+                    <td style="width: 70px;"></td>
+                    <td v-for="day of days" class="text-center" style="width: 60px; height: 20px;">{{day}}</td>
+                </tr>
+            </table>
+            <div style="height: 80%; overflow: scroll;">
+                <table :id="`${actor}NotificationTable`">
+                    <tr v-for="i in schedule.length">
+                        <td style="width: 70px;" class="text-right">{{(i % 12 === 0 ? 12 : i % 12)}}:00 {{i > 12 ? "PM" : "AM"}}</td>
+                        <td 
+                            v-for="j in 7"  
+                            :id="`${i - 1},${j - 1}`"
+                            class="pointer"
+                            @click="select($event)"
+                            :style="`width: 60px; height: 20px; background: ${schedule[i - 1][j - 1] ? 'aquamarine' : '#c4c4c4c4'}; border: 0.5px solid #000;`"
+                        >
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </template>
+
+        <template id="notification">
+            <div 
+                :id="id" 
+                class="shadow align-center hidden"
+                style="
+                    border-radius: 10px;
+                    position: absolute; color: #2D87E2; width: 250px;
+                    top: 0; right: 0; padding: 15px; margin: 20px; 
+                    margin-right: 15px; background-color: #FFF;
+                "
+            >
+                <img src="./images/icon-bell.png"style="width: 20px;"/>
+                <p 
+                    @click="alert"
+                    :id="`${id}Text`"
+                    class="text-center" 
+                    style="margin: 0; width: calc(100% - 20px);" 
+                ></p>
+            </div>
+        </template>
+    </body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>HW9 and HW10 makeup work</title>
+</head>
+<body>
+	<h1>Writeup</h1>
+
+	<section>
+		<h2>Final design</h2>
+		The final design I plan to turn in will be what I currently have but extended to channels (or groups, time permitting) with
+		some of the current bugs fixed. The main features will be
+		<ul>
+			<li>Creating customized notification schedules for entire channels rather than individuals</li>
+			<li>Providing better notification UI to showcase that a new message was sent</li>
+		</ul>
+		Additionally, I will fix the minor computation bugs and figure out a better solution to getting number 
+		of unread messages. I will also add support for sending and recieving messages
+	</section>
+	<section>
+		<h2>What I did in this submission</h2>
+		In this submission, I implemented customizable notifications for individuals. I created a component called Schedule 
+		which allows me to specify the notification schedule for an individual. I was able to get the notifications api to 
+		send notifications when a message was recieved but I decided to hold off on making it only notify when the time 
+		is within the specified range. The reason for this choice is for the next step I would need to handle the logic
+		differently as it would be the union of all possible schedules. This submission was meant to be a proof of concept
+		for extending my idea to channels and I was able to implement the scheduler and integrate it with graffiti. 
+		There are currently some minor bugs with the current version, for instance the total number of unread counter is a bit hacky. 
+		Moreover, I currently do not support sending and recieving images privately because it is not an important part of my 
+		design and I wanted to focus on the scheduler. 
+	</section>
+</body>
+</html>
