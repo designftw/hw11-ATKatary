@@ -30,7 +30,7 @@ const Actor = {
                 this.username = await this.resolver.actorToUsername(this.actor);
             }
 
-            console.log(`${this.actor.id} >> {name: ${this.name}, username: ${this.username}, icon: ${this.img}}`);
+            // console.log(`${this.actor} >> {name: ${this.name}, username: ${this.username}, icon: ${this.img}}`);
         },
 
         async icon(icon) {
@@ -41,7 +41,7 @@ const Actor = {
                     return;
 
                 } catch (TypeError) {
-                    console.log(`bad profile image for actor ${this.username}`);
+                    // console.log(`bad profile image for actor ${this.username}`);
                 }
             }
             this.url = defaultIcon;

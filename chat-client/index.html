@@ -6,7 +6,10 @@
     </head>
     <body>
         <div id="app" v-if="$gf.me" class="flex column">
-            <nav style="padding: 30px; padding-bottom: 0;">
+            <nav style="padding: 30px; padding-bottom: 0; width: fit-content;"  class="flex column align-center">
+                <button @click="$gf.toggleLogIn" style="margin: 10px;">
+                    {{ $gf.me? 'Log Out' : 'Log In' }}
+                </button>
                 <actor 
                     :actor="$gf.me" 
                     style="width: max-content"
@@ -61,7 +64,7 @@
                     </div>
                 </div>
             </div>
-            <notification id="notification" :timeout="3"></notification>
+            <notification id="notification" :timeout="5"></notification>
         </div>
 
         <!-- Templates -->
@@ -169,7 +172,7 @@
         </template>
 
         <template id="read">
-            <p style="margin: 0; font-size: x-small;"><i>{{read}}</i></p>
+            <p style="margin: 0; font-size: x-small;" :id="`${messageid}Reciept`"><i>{{read}}</i></p>
         </template>
 
         <template id="schedule">
@@ -206,23 +209,7 @@
         </template>
 
         <template id="notification">
-            <div 
-                :id="id" 
-                class="shadow align-center hidden"
-                style="
-                    border-radius: 10px;
-                    position: absolute; color: #2D87E2; width: 250px;
-                    top: 0; right: 0; padding: 15px; margin: 20px; 
-                    margin-right: 15px; background-color: #FFF;
-                "
-            >
-                <img src="./images/icon-bell.png"style="width: 20px;"/>
-                <p 
-                    @click="alert"
-                    :id="`${id}Text`"
-                    class="text-center" 
-                    style="margin: 0; width: calc(100% - 20px);" 
-                ></p>
+            <div :id="id" class="hidden column align-center">
             </div>
         </template>
     </body>

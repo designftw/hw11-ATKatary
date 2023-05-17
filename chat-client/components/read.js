@@ -30,7 +30,7 @@ const Read = {
                     elm.innerText = "0";
                 } 
         
-                elm.innerText = unread ? `${parseInt(elm.innerText) + 1}` : `${Math.max(parseInt(elm.innerText) - 1, 0)}`;
+                elm.innerText = unread ? `${Math.floor((parseInt(elm.innerText) + 1) / 2)}` : `${Math.max((parseInt(elm.innerText)) / 2, 0)}`;
 
                 if (parseInt(elm.innerText) !== 0) {
                     elm.style.backgroundColor = "rgb(45, 135, 226)"

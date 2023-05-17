@@ -26,7 +26,14 @@ const Schedule = {
 
     computed: {
         schedule() {
-            const schedule = this.objects.filter(o => (o.type == "Schedule") && typeof o.schedule == "string")
+            const schedule = this.objects.filter(o => {
+                return (o.type == "Schedule") && 
+                       (typeof o.schedule == "string") && 
+                       (
+                        ((o.context[0] === this.$gf.me) && (o.context[1] === this.actor)) ||
+                        ((o.context[1] === this.$gf.me) && (o.context[0] === this.actor))
+                       );
+            })
                     .sort((o1, o2)=> new Date(o2.published) - new Date(o1.published));
 
             if (schedule.length === 0 || this.defaultAll) {

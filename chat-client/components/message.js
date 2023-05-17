@@ -22,9 +22,11 @@ const Message = {
 
     methods: {
         async send() {
+            console.log(this.actor)
             if (this.content === "") return
             const message = {
                 type: 'Note',
+                bto: [this.actor],
                 content: this.content,
                 context: [this.$gf.me, this.actor]
             }

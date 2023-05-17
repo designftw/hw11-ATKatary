@@ -28,11 +28,42 @@ const Chat = {
 
     watch: {
         objects() {
+            let notify = false;
+            for (const message of this.messages) {
+                const reciept = document.getElementById(`${message.id}Reciept`);
+                if (reciept == null) return;
+                if (reciept.innerText !== "read" && message.actor !== this.$gf.me) notify = true;
+            };     
+            if (!notify) return 
+            
+            let name = this.objects.filter(m => m.type === "Profile")
+                                .filter(p => p.name && typeof p.name =='string')
+                                .reduce((prev, curr)=> (!prev || (curr.published > prev.published))? curr : prev, null);
+            if (!name) return "";
+            name =  name.name;
+
+            let schedule = this.objects.filter(o => {
+                return (o.type == "Schedule") && 
+                       (typeof o.schedule == "string") && 
+                       (
+                        ((o.context[0] === this.$gf.me) && (o.context[1] === this.context)) ||
+                        ((o.context[1] === this.$gf.me) && (o.context[0] === this.context))
+                       );
+            })
+            .sort((o1, o2)=> new Date(o2.published) - new Date(o1.published));
+
+            if (schedule.length !== 0) {
+                schedule = JSON.parse(schedule[0].schedule);
+                const today = new Date();
+                if (!schedule[today.getHours()][(today.getDay() + 6) % 7]) notify = false;            }
+
+            if (!notify) return
             Notification.requestPermission().then((perm) => {
                 if (perm === "granted") {
-                    const text = `Check inbox`;
+                    const text = `New message from ${name}`;
                     const notification = new Notification("To do list", {body: text});
                     this.notify(text);
+                    console.log(text)
                 }
             });
         }
@@ -40,7 +71,16 @@ const Chat = {
 
     computed: {
         messages() {
-            let messages = this.objects.filter(m => (m.type == "Note") && typeof m.content == "string");
+            let messages = this.objects.filter(m => {
+                return  (m.type == "Note") && 
+                        (typeof m.content == "string") && 
+                        (m.context.length == 2) && 
+                        (
+                            ((m.context[0] == this.$gf.me) && (m.context[1] == this.context)) ||
+                            ((m.context[1] == this.$gf.me) && (m.context[0] == this.context))
+                        )
+                        
+            });
             // console.log(`Found ${messages.length} messages in context of ${this.context}`);
 
             messages = messages.sort((m1, m2)=> new Date(m2.published) - new Date(m1.published))
@@ -73,9 +113,26 @@ const Chat = {
         },
 
         notify(text) {
-            const notification = document.getElementById("notificationText")
+            const html = `<div 
+            class="shadow align-center flex"
+            style="
+                border-radius: 10px;
+                position: absolute; color: #2D87E2; width: 250px;
+                top: 0; right: 0; padding: 15px; margin: 20px; 
+                margin-right: 15px; background-color: #FFF;
+            "
+        >
+            <img src="./images/icon-bell.png"style="width: 20px;"/>
+            <p 
+                @click="alert"
+                :id="\`\${id}Text\`"
+                class="text-center" 
+                style="margin: 0; width: calc(100% - 20px);" 
+            >${text}</p>
+        </div>`
+            const notification = document.getElementById("notification")
             if (notification) {
-                notification.innerText = text; 
+                notification.innerHTML += html; 
                 notification.click();
             }
         },

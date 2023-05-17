@@ -25,6 +25,7 @@ const Notification = {
             setTimeout(() => {
                 notification.classList.add(hidden);
                 notification.classList.remove(flex);
+                notification.innerHTML = "";
             }, this.timeout * 1000);
         }
     },
